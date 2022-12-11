@@ -88,12 +88,19 @@ def resizeAndCrop(dataset):
 
 
 def loadNormalMNIST(samplesPerClass = 1000, random_state=None):
-    images, labels = MNISTreader(samplesPerClass = 1000, random_state=random_state)
+    images, labels = MNISTreader(samplesPerClass = 1000, random_state=random_state)    
+
+    # normalise the images to [0, 1]
+    images = images / 255.0
+    
     return images, labels
 
 
 def loadChineseMNIST():
     chineseImages, chineseLabels = chineseMNISTreader()
     processedImages = resizeAndCrop(chineseImages)
+
+    # normalise the images to [0, 1]
+    processedImages = processedImages / 255.0
 
     return processedImages, chineseLabels
