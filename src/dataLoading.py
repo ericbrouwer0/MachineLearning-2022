@@ -14,8 +14,14 @@ def MNISTreader(samplesPerClass = 1000, random_state=None):
     df = df.groupby('label').sample(n=samplesPerClass, random_state=random_state)
     labels = df['label'].to_list()
     df.drop(['label'], axis=1, inplace=True)
-    images = df.to_numpy()
 
+    vectors = df.to_numpy()
+    images = []
+
+    for vec in vectors:
+        img = np.reshape(vec, (28,28))
+        images.append(img)
+    
     return images, labels
 
 
@@ -44,7 +50,7 @@ def chineseMNISTreader():
 # down to that bounding box, and resize to 28x28
 def resizeAndCrop(dataset):
 
-    newDataset = np.zeros((len(dataset), 784))
+    newDataset = [] #np.zeros((len(dataset), 784))
 
     for idx, vector in enumerate(dataset):
         img = np.reshape(vector, (64,64)).astype('uint8')
@@ -86,9 +92,7 @@ def resizeAndCrop(dataset):
         resized_crop = cv2.resize(crop, (28,28))
 
         #new_vector = np.reshape(resized_crop, (784,))
-        newDataset[idx] = resized_crop
-
-    return newDataset
+        newDataset.append(resized_crop)
 
     return newDataset
 
