@@ -50,12 +50,18 @@ def resizeAndCrop(dataset):
         img = np.reshape(vector, (64,64)).astype('uint8')
 
         # threshold 
-        thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+        ret, img_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        """Sara's stuff"""
+        kernel = np.ones((2, 2), np.uint8) #also needs to be tuned
+        img_dil = cv2.dilate(img_bin, kernel, iterations=1)
+        #img_smth = gaussian_filter(img_bin, sigma= sigma)
+        #img_smth = cv2.GaussianBlur(img_dil,(3,3),sigmaX=0.6)
+        img_smth = cv2.blur(img_dil,(2,2))
 
+        """the rest is the same"""
         # get bounds of white pixels
-        white = np.where(thresh==255)
+        white = np.where(img_bin==255)
         xmin, ymin, xmax, ymax = np.min(white[1]), np.min(white[0]), np.max(white[1]), np.max(white[0])
-        #print(xmin,xmax, ymin,ymax)
         yrange = ymax-ymin
         xrange = xmax-xmin
 
@@ -71,27 +77,25 @@ def resizeAndCrop(dataset):
 
         # the dimensions of the bounding box (prevent going off the edges of the image)
         top = y_center-size if y_center-size > 0 else 0
-        bottom = y_center+size if y_center+size > 0 else 0
+        bottom = y_center+size if y_center+size < 64 else 64
         left = x_center-size if x_center-size > 0 else 0
-        right = x_center+size if x_center+size > 0 else 0
+        right = x_center+size if x_center+size < 64 else 64
 
         # crop the image and resize it
-        crop = img[top : bottom, left : right]
+        crop = img_smth[top : bottom, left : right]
         resized_crop = cv2.resize(crop, (28,28))
 
+        #new_vector = np.reshape(resized_crop, (784,))
+        newDataset[idx] = resized_crop
 
-        new_vector = np.reshape(resized_crop, (784,))
-        newDataset[idx] = new_vector
+    return newDataset
 
-    return(newDataset)
+    return newDataset
 
 
 
 def loadNormalMNIST(samplesPerClass = 1000, random_state=None):
     images, labels = MNISTreader(samplesPerClass = 1000, random_state=random_state)    
-
-    # normalise the images to [0, 1]
-    images = images / 255.0
     
     return images, labels
 
@@ -100,7 +104,6 @@ def loadChineseMNIST():
     chineseImages, chineseLabels = chineseMNISTreader()
     processedImages = resizeAndCrop(chineseImages)
 
-    # normalise the images to [0, 1]
-    processedImages = processedImages / 255.0
+    processedImages = processedImages
 
     return processedImages, chineseLabels
