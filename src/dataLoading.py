@@ -22,7 +22,7 @@ def MNISTreader(samplesPerClass = 1000, random_state=None):
         img = np.reshape(vec, (28,28))
         images.append(img)
     
-    return images, labels
+    return vectors, images, labels
 
 
 
@@ -34,15 +34,16 @@ def chineseMNISTreader():
     df = df[df.label < 10]
     len(df)
 
+    df = df.sort_values(by=['label'])
     labels = df['label'].to_list()
     characters = df['character']
     df.drop(['label'], axis=1, inplace=True)
     df.drop(['character'], axis=1, inplace=True)
 
     # "images" is the np array of images
-    images = df.to_numpy()
+    vectors = df.to_numpy()
 
-    return images, labels
+    return vectors, labels
 
 
 
@@ -50,7 +51,8 @@ def chineseMNISTreader():
 # down to that bounding box, and resize to 28x28
 def resizeAndCrop(dataset):
 
-    newDataset = [] #np.zeros((len(dataset), 784))
+    imageDataset = [] #
+    vectorDataset = np.zeros((len(dataset), 784))
 
     for idx, vector in enumerate(dataset):
         img = np.reshape(vector, (64,64)).astype('uint8')
@@ -72,14 +74,14 @@ def resizeAndCrop(dataset):
         xrange = xmax-xmin
 
         # take the max of the width or height of the image, we'll use this to define the cropping
-        range = yrange if yrange>xrange else xrange
-        if range%2 != 0: # make sure its not odd
-            range += 1
+        Range = yrange if yrange>xrange else xrange
+        if Range%2 != 0: # make sure its not odd
+            Range += 1
 
         x_center = int(np.round((xmax+xmin)/2))
         y_center = int(np.round((ymax+ymin)/2))
 
-        size = int(range/2 + 5) # pad all sides by 5 pixels
+        size = int(Range/2 + 5) # pad all sides by 5 pixels
 
         # the dimensions of the bounding box (prevent going off the edges of the image)
         top = y_center-size if y_center-size > 0 else 0
@@ -91,23 +93,24 @@ def resizeAndCrop(dataset):
         crop = img_smth[top : bottom, left : right]
         resized_crop = cv2.resize(crop, (28,28))
 
-        #new_vector = np.reshape(resized_crop, (784,))
-        newDataset.append(resized_crop)
+        # add to datasets
+        imageDataset.append(resized_crop)
+        new_vector = np.reshape(resized_crop, (784,))
+        vectorDataset[idx] = new_vector
 
-    return newDataset
+    return vectorDataset, imageDataset
 
 
 
 def loadNormalMNIST(samplesPerClass = 1000, random_state=None):
-    images, labels = MNISTreader(samplesPerClass = 1000, random_state=random_state)    
+    mnistVectors, mnistImages, mnistLabels = MNISTreader(samplesPerClass = 1000, random_state=random_state)    
     
-    return images, labels
+    return mnistVectors, mnistImages, mnistLabels
 
 
 def loadChineseMNIST():
-    chineseImages, chineseLabels = chineseMNISTreader()
-    processedImages = resizeAndCrop(chineseImages)
+    vectors, chineseLabels = chineseMNISTreader()
+    chineseVectors, chineseImages = resizeAndCrop(vectors)
+    #processedImages = processedImages
 
-    processedImages = processedImages
-
-    return processedImages, chineseLabels
+    return chineseVectors, chineseImages, chineseLabels
