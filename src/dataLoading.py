@@ -1,16 +1,13 @@
 import cv2
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
-
 
 
 def MNISTreader(samplesPerClass = 1000, random_state=None):
     df1=pd.read_csv('Data/mnist_train.csv')
     df2=pd.read_csv('Data/mnist_test.csv')
     df = pd.concat([df1, df2])
-    #
+
     df = df.groupby('label').sample(n=samplesPerClass, random_state=random_state)
     labels = df['label'].to_list()
     df.drop(['label'], axis=1, inplace=True)
@@ -27,7 +24,6 @@ def MNISTreader(samplesPerClass = 1000, random_state=None):
 
 
 def chineseMNISTreader():
-
     df=pd.read_csv('Data/chineseMNIST.csv')
 
     # get rid of the non 0-9 classes here
@@ -46,7 +42,6 @@ def chineseMNISTreader():
     return vectors, labels
 
 
-
 # function to find a bounding box for the character on the image, crop it 
 # down to that bounding box, and resize to 28x28
 def resizeAndCrop(dataset):
@@ -59,14 +54,12 @@ def resizeAndCrop(dataset):
 
         # threshold 
         ret, img_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        """Sara's stuff"""
         kernel = np.ones((2, 2), np.uint8) #also needs to be tuned
         img_dil = cv2.dilate(img_bin, kernel, iterations=1)
         #img_smth = gaussian_filter(img_bin, sigma= sigma)
         #img_smth = cv2.GaussianBlur(img_dil,(3,3),sigmaX=0.6)
         img_smth = cv2.blur(img_dil,(2,2))
 
-        """the rest is the same"""
         # get bounds of white pixels
         white = np.where(img_bin==255)
         xmin, ymin, xmax, ymax = np.min(white[1]), np.min(white[0]), np.max(white[1]), np.max(white[0])
@@ -101,7 +94,6 @@ def resizeAndCrop(dataset):
     return vectorDataset, imageDataset
 
 
-
 def loadNormalMNIST(samplesPerClass = 1000, random_state=None):
     mnistVectors, mnistImages, mnistLabels = MNISTreader(samplesPerClass = 1000, random_state=random_state)    
     
@@ -114,3 +106,31 @@ def loadChineseMNIST():
     #processedImages = processedImages
 
     return chineseVectors, chineseImages, chineseLabels
+
+
+# seperate the integer labels of both datasets by making them into strings
+def makeNewLabels(oldLabels, chinese=False):
+    newLabels = []
+    for lab in oldLabels:
+        if chinese == True:
+            newLab = "chinese_"+str(lab)
+        else:
+            newLab = "mnist_"+str(lab)
+        newLabels.append(newLab)
+    return newLabels
+
+# load both of the datasets in one set
+# returns the images as vectors, arrays and their (string) labels
+# first half of data is the classic mnist digits, second half is the chinese mnist digits
+def dataLoader():
+    mnistVectors, mnistImages, mnistLabels = loadNormalMNIST()
+    chineseVectors, chineseImages, chineseLabels = loadChineseMNIST()
+
+    newChineseLabels = makeNewLabels(chineseLabels, chinese=True)
+    newMnistLabels = makeNewLabels(mnistLabels, chinese=False)
+
+    allVectors = np.concatenate([mnistVectors, chineseVectors])
+    allImages = np.concatenate([mnistImages, chineseImages])
+    allLabels = np.concatenate([newMnistLabels, newChineseLabels])
+
+    return allVectors, allImages, allLabels
