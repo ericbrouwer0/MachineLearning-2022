@@ -225,6 +225,9 @@ def handcraftedFeaturesExtractor(train_img, test_img):
     X_train.append(n_Contours(train_img))
     X_test.append(n_Contours(test_img))
 
+    X_train.append(n_Circles(train_img))
+    X_test.append(n_Circles(test_img))
+
     X_train.append(heigh_width(train_img))
     X_test.append(heigh_width(test_img))
 
