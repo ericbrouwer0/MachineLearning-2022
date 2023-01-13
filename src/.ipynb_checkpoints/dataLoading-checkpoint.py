@@ -123,8 +123,13 @@ def makeNewLabels(oldLabels, chinese=False):
 # load both of the datasets in one set
 # returns the images as vectors, arrays and their (string) labels
 # first half of data is the classic mnist digits, second half is the chinese mnist digits
-def dataLoader(refresh_data = False):
+def dataLoader(refresh_data = False, mnist_only=False, chinese_mnist_only=False):
     data_dir = 'Data/processed_data.pkl'
+    if(mnist_only == True and chinese_mnist_only == False):
+        data_dir = 'Data/processed_data_mnist.pkl'
+    elif(mnist_only == False and chinese_mnist_only == True):
+        data_dir = 'Data/processed_data_chinese.pkl'
+        
     if(not refresh_data and os.path.exists(data_dir)):
         with open(data_dir, 'rb') as f:
             allVectors, allImages, allLabels = pickle.load(f)
@@ -136,9 +141,19 @@ def dataLoader(refresh_data = False):
     newChineseLabels = makeNewLabels(chineseLabels, chinese=True)
     newMnistLabels = makeNewLabels(mnistLabels, chinese=False)
 
-    allVectors = np.concatenate([mnistVectors, chineseVectors])
-    allImages = np.concatenate([mnistImages, chineseImages])
-    allLabels = np.concatenate([newMnistLabels, newChineseLabels])
+    allVectors, allImages, allLabels = [], [], []
+    if(mnist_only == False and chinese_mnist_only == False):
+        allVectors = np.concatenate([mnistVectors, chineseVectors])
+        allImages = np.concatenate([mnistImages, chineseImages])
+        allLabels = np.concatenate([newMnistLabels, newChineseLabels])
+    elif(mnist_only):
+        allVectors = mnistVectors
+        allImages = mnistImages
+        allLabels = newMnistLabels
+    else:
+        allVectors = chineseVectors
+        allImages = chineseImages
+        allLabels = newChineseLabels
     
     with open(data_dir, 'wb') as f:
         pickle.dump([allVectors, allImages, allLabels], f)
