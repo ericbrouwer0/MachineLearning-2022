@@ -8,6 +8,6 @@ To run the code you need to install the requirements:
 
 ```pip install -r requirements.txt```
 
-MNIST data from https://www.kaggle.com/datasets/oddrationale/mnist-in-csv?select=mnist_train.csv. This is a preprocessd version of http://yann.lecun.com/exdb/mnist/.
+MNIST data from https://www.kaggle.com/datasets/oddrationale/mnist-in-csv?select=mnist_train.csv. This is a processed version of http://yann.lecun.com/exdb/mnist/.
 
 CHINESE numbers from Nazarpour, K; Chen, M (2017): Handwritten Chinese Numbers. Newcastle University. Dataset. https://doi.org/10.17634/137930-3.
