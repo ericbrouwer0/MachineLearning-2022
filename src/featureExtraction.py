@@ -20,7 +20,6 @@ def runPCA(X_train, X_test, n_components = 85):
 
 
 
-
 ################################################################
 ##############   HANDCRAFTED FEATURE EXTRACTION   ##############
 ################################################################
@@ -67,7 +66,7 @@ def edges_laplace(data_Images):
     edges = np.zeros(len(data_Images)) 
     for ii in range(len(data_Images)):
         img = data_Images[ii].astype('uint8')
-        lapl = cv2.Laplacian(img, ddepth=-1) # ddepth -1: output same depth as source
+        lapl = cv2.Laplacian(img, ddepth=-1) # depth -1: output same depth as source
         edges[ii] = np.sum(lapl)
     #plt.imshow(lapl, cmap='gray')
     return edges
@@ -84,11 +83,11 @@ def mean_brightness(vectors):
 ### NUMBER OF COUNTOURS (LENGTH OF COUNTOURS)
 def n_Contours(data): 
     #Contours can be explained simply as a curve joining all the continuous points (along the boundary), having same color or intensity
-#IMAGE DATA
+
     nu_lines = np.zeros(len(data)) 
     for ii in range(len(data)):
         img = data[ii].astype('uint8')
-        img_bin = cv2.threshold(img, 30, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1] # the threshold needs to be tuned
+        img_bin = cv2.threshold(img, 30, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
         num_labels, labels = cv2.findContours(img_bin, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         nu_lines[ii] = np.shape(num_labels)[0]
@@ -102,7 +101,7 @@ def n_Circles(data):
     circles = np.zeros(len(data))
     for ii in range(len(data)):
         img = data[ii].astype('uint8')
-        img_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1] # the threshold needs to be tuned
+        img_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
         try:
             circles[ii] = len(cv2.HoughCircles(img_bin,cv2.HOUGH_GRADIENT_ALT, dp=1.5 , minDist = 7,
                             param1=10,param2=1)) 
@@ -117,7 +116,7 @@ def heigh_width(data):
     ratio = np.zeros(len(data))
     for ii in range(len(data)):
         img = data[ii].astype('uint8')
-        img_bin = cv2.threshold(img, 20, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1] # the threshold needs to be tuned
+        img_bin = cv2.threshold(img, 20, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
         white = np.where(img_bin == 255)
         xmin, ymin, xmax, ymax = np.min(white[1]), np.min(white[0]), np.max(white[1]), np.max(white[0])
         ratio[ii] = (ymax-ymin)/(xmax-xmin)
@@ -129,7 +128,7 @@ def center_col_row(data):
     ratios = np.zeros(len(data))
     for ii in range(len(data)):
         img = data[ii].astype('uint8')
-        img_bin = cv2.threshold(img, 20, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1] # the threshold needs to be tuned
+        img_bin = cv2.threshold(img, 20, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1] 
         white = np.where(img_bin != 0)
         xmin, ymin, xmax, ymax = np.min(white[1]), np.min(white[0]), np.max(white[1]), np.max(white[0])
         yrange, xrange = ymax-ymin, xmax-xmin
@@ -211,7 +210,7 @@ def handcraftedFeaturesExtractor(train_img, test_img):
     X_train.append(MG_train)
     X_test.append(MG_test)
 
-    n_clusters = 10
+    n_clusters = 20
     KM_train, KM_test = K_means(train_vec, test_vec, n_clusters)
     X_train.append(KM_train)
     X_test.append(KM_test)
